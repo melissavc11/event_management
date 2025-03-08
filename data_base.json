@@ -1,0 +1,22 @@
+{
+    "eventos": [
+        {
+            "titulo_evento": "Evento 1",
+            "fecha_hora_evento": "2021-10-10 10:00:00",
+            "descripcion_evento": "Descripcion 1",
+            "ubicacion_evento": "Lugar 1"
+        },
+        {
+            "titulo_evento": "Evento 2",
+            "fecha_hora_evento": "2021-10-10 10:00:00",
+            "descripcion_evento": "Descripcion 2",
+            "ubicacion_evento": "Lugar 2"
+        },
+        {
+            "titulo_evento": "Evento 3",
+            "fecha_hora_evento": "2021-10-10 10:00:00",
+            "descripcion_evento": "Descripcion 3",
+            "ubicacion_evento": "Lugar 3"
+        }
+    ]
+}
