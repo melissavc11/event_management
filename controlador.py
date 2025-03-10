@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
 from datetime import datetime
 from modelo import gestor_eventos
+import flask_cors
 
 app = Flask(__name__)
-
+flask_cors.CORS(app)
 
 @app.route("/events", methods=["POST"])
 def post_events():
@@ -67,8 +68,7 @@ def get_events():
     >>>             "titulo_evento": str,
     >>>             "fecha_hora_evento": str,
     >>>             "descripcion_evento": str,
-    >>>             "ubicacion_evento": int,
-    >>>             "id_evento": int
+    >>>             "ubicacion_evento": int
     >>>         }
     >>>     ]}
     >>> 500 Internal Server Error:
@@ -99,8 +99,7 @@ def get_event_by_id(id_evento):
     >>>         "titulo_evento": str,
     >>>         "fecha_hora_evento": str,
     >>>         "descripcion_evento": str,
-    >>>         "ubicacion_evento": int,
-    >>>         "id_evento": int
+    >>>         "ubicacion_evento": int
     >>>     }}
     >>> 500 Internal Server Error:
     >>>     {"error": "Mensaje de error"}   
@@ -108,10 +107,10 @@ def get_event_by_id(id_evento):
     try:
         respuesta = gestor_eventos.get_event_by_id(id_evento)
         if respuesta["codigo"] == 500:
-            return jsonify({"error": respuesta["mensaje"]}), 500
+            return jsonify({"error": respuesta["mensaje"]}), 400
         return jsonify({"data": respuesta["registro"]}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": str(e)}), 400
 
 
 @app.route("/events/<int:id_evento>", methods=["PUT"])
@@ -153,7 +152,7 @@ def put_event_by_id(id_evento):
                                                    data["descripcion_evento"], data["ubicacion_evento"], id_evento)
         if respuesta["codigo"] == 500:
             return jsonify({"error": respuesta["mensaje"]}), 500
-        return jsonify({"mensaje": f"Evento {data["titulo_evento"]} actualizado"}), 200
+        return jsonify({"mensaje": f"Evento ({data['titulo_evento']}) actualizado"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -178,7 +177,36 @@ def delete_event_by_id(id_evento):
         respuesta = gestor_eventos.delete_event_by_id(id_evento)
         if respuesta["codigo"] == 500:
             return jsonify({"error": respuesta["mensaje"]}), 500
-        return jsonify({"mensaje": f"Evento {respuesta["data"]["titulo_evento"]} eliminado"}), 200
+        return jsonify({"mensaje": f"Evento ({respuesta['data']['titulo_evento']}) eliminado"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/locations", methods=["GET"])
+def get_locations():
+    """
+    Obtenemos todas las ubicaciones registradas en la base de datos.
+
+    Returns:
+        Response: Un objeto JSON con las ubicaciones registradas en la base de datos y el código de estado HTTP correspondiente.
+
+    JSON Request Body:
+        None.
+    JSON Response:
+    >>> 200 OK:
+    >>>     {"data": [
+    >>>         {
+    >>>             "nombre_ubicacion": str,
+    >>>             "direccion_ubicacion": str,
+    >>>         }
+    >>>     ]}
+    >>> 500 Internal Server Error:
+    >>>     {"error": "Mensaje de error"}
+    """
+    try:
+        respuesta = gestor_eventos.gestor_ubicacion.get_ubicaciones()
+        if respuesta["codigo"] == 500:
+            return jsonify({"error": respuesta["mensaje"]}), 500
+        return jsonify({"data": respuesta["registro"]}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

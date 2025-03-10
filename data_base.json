@@ -2,11 +2,13 @@
     "eventos": [
         {
             "titulo_evento": "Evento 1",
-            "fecha_hora_evento": "2025-03-20 10:00:00",
+            "fecha_hora_evento": "2025-03-20 18:00:00",
             "descripcion_evento": "Descripcion 1",
-            "ubicacion_evento": 0
+            "ubicacion_evento": 0,
+            "index": 1
         },
         {
+            "index": 2,
             "titulo_evento": "Evento 2",
             "fecha_hora_evento": "2025-03-20 10:00:00",
             "descripcion_evento": "Descripcion 2",
@@ -14,22 +16,23 @@
         },
         {
             "titulo_evento": "Evento 3",
-            "fecha_hora_evento": "2025-03-20 10:00:00",
+            "fecha_hora_evento": "2025-03-11 16:00:00",
             "descripcion_evento": "Descripcion 3",
-            "ubicacion_evento": 2
+            "ubicacion_evento": 0,
+            "index": 4
         }
     ],
-    "ubicaciones":[
+    "ubicaciones": [
         {
             "nombre_ubicacion": "Expofuturo",
-            "direccion_ubicacion": "Cr19 93-02, Villa Olímpica, Pereira, Risaralda"
+            "direccion_ubicacion": "Cr19 93-02, Villa Ol\u00edmpica, Pereira, Risaralda"
         },
         {
-            "nombre_ubicacion": "Teatro Santiago Londoño",
+            "nombre_ubicacion": "Teatro Santiago Londo\u00f1o",
             "direccion_ubicacion": "Cra. 12 #18-13, Pereira, Risaralda"
         },
         {
-            "nombre_ubicacion": "Auditorio Jorge Roa Martínez",
+            "nombre_ubicacion": "Auditorio Jorge Roa Mart\u00ednez",
             "direccion_ubicacion": "Cl. 27 #10 - 02, Pereira, Risaralda"
         }
     ]

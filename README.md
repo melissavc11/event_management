@@ -24,7 +24,7 @@ Obtiene todos los eventos registrados en la base de datos.
 None.
 
 #### Responses
-- **200 OK**: `{"data": [{"titulo_evento": str, "fecha_hora_evento": str, "descripcion_evento": str, "ubicacion_evento": int, "id_evento": int}]}`
+- **200 OK**: `{"data": [{"titulo_evento": str, "fecha_hora_evento": str, "descripcion_evento": str, "ubicacion_evento": int}]}`
 - **500 Internal Server Error**: `{"error": "Mensaje de error"}`
 
 ### GET /events/<int:id_evento>
@@ -34,7 +34,7 @@ Obtiene un evento específico basado en su ID.
 None.
 
 #### Responses
-- **200 OK**: `{"data": {"titulo_evento": str, "fecha_hora_evento": str, "descripcion_evento": str, "ubicacion_evento": int, "id_evento": int}}`
+- **200 OK**: `{"data": {"titulo_evento": str, "fecha_hora_evento": str, "descripcion_evento": str, "descripcion_evento": int}}`
 - **500 Internal Server Error**: `{"error": "Mensaje de error"}`
 
 ### PUT /events/<int:id_evento>
@@ -59,4 +59,15 @@ None.
 
 #### Responses
 - **200 OK**: `{"mensaje": "Evento {titulo_evento} eliminado"}`
+- **500 Internal Server Error**: `{"error": "Mensaje de error"}`
+
+
+### GET /locations
+Obtenemos todas las ubicaciones registradas en la base de datos.
+
+#### Request Body
+None.
+
+#### Responses
+- **200 OK**: `{"data": [{"nombre_ubicacion": str,"direccion_ubicacion": str}]}`
 - **500 Internal Server Error**: `{"error": "Mensaje de error"}`

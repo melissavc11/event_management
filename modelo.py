@@ -1,5 +1,7 @@
 import json
-from datetime import datetime, timedelta
+import traceback
+import copy
+from datetime import datetime, timedelta, time
 
 
 class GestionEventos:
@@ -23,7 +25,8 @@ class GestionEventos:
         Returns:
             dict: Mensaje de éxito o error.
             {"mensaje": "Evento creado", "codigo": 200} o
-            {"mensaje": "Mensaje de error", "codigo": 500}
+            {"mensaje": "Mensaje de error", "codigo": 500,
+                "info": "Informacion adicional del error"}
 
         Example:
         >>> gestion = GestionEventos()
@@ -49,8 +52,8 @@ class GestionEventos:
                 raise ValueError(
                     "La fecha y hora del evento no puede ser mayor a dos años desde la fecha y hora actual")
 
-            hora_minima = datetime.time(8, 0, 0)
-            hora_maxima = datetime.time(22, 0, 0)
+            hora_minima = time(8, 0, 0)
+            hora_maxima = time(22, 0, 0)
             if fecha_hora_evento.time() < hora_minima or fecha_hora_evento.time() > hora_maxima:
                 raise ValueError(
                     "La hora del evento debe ser entre las 8:00 am y las 10:00 pm")
@@ -82,7 +85,7 @@ class GestionEventos:
                                                [titulo_evento, fecha_hora_evento.strftime("%Y-%m-%d %H:%M:%S"), descripcion_evento, ubicacion_evento])
             return respuesta
         except Exception as e:
-            return {"mensaje": str(e), "codigo": 500}
+            return {"mensaje": str(e), "codigo": 500, "info": traceback.format_exc().splitlines()[-4:-2]}
 
     def get_events(self) -> dict:
         """
@@ -91,7 +94,8 @@ class GestionEventos:
         Returns:
             dict: Registro con mensaje de éxito o mensaje de error.
             {"registro": [{"campo1": "valor1", "campo2": "valor2", ...}, ...], "mensaje": "Registros encontrados", "codigo": 200} o
-            {"mensaje": "Mensaje de error", "codigo": 500}
+            {"mensaje": "Mensaje de error", "codigo": 500,
+                "info": "Informacion adicional del error"}
 
         Example:
         >>> gestion = GestionEventos()
@@ -104,11 +108,16 @@ class GestionEventos:
             ubicaciones = self.gestor_ubicacion.get_ubicaciones()
             if ubicaciones["codigo"] == 500:
                 raise ValueError(ubicaciones["mensaje"])
+            eventos_modificados = []
             for evento in respuesta["registro"]:
-                evento["ubicacion_evento"] = ubicaciones["registro"][evento["ubicacion_evento"]]
+                # Crear una copia profunda del evento
+                evento_copia = copy.deepcopy(evento)
+                evento_copia["ubicacion_evento"] = ubicaciones["registro"][evento["ubicacion_evento"]]
+                eventos_modificados.append(evento_copia)
+            respuesta["registro"] = eventos_modificados
             return respuesta
         except Exception as e:
-            return {"mensaje": str(e), "codigo": 500}
+            return {"mensaje": str(e), "codigo": 500, "info": traceback.format_exc().splitlines()[-4:-2]}
 
     def get_event_by_id(self, id_evento: int) -> dict:
         """
@@ -120,7 +129,7 @@ class GestionEventos:
         Returns:
             dict: Registro con mensaje de éxito o mensaje de error.
             {"registro": {"campo1": "valor1", "campo2": "valor2", ...}, "mensaje": "Registro encontrado", "codigo": 200} o
-            {"mensaje": "Mensaje de error", "codigo": 500}
+            {"mensaje": "Mensaje de error", "codigo": 500, "info": "Informacion adicional del error"}
 
         Example:
         >>> gestion = GestionEventos()
@@ -128,15 +137,18 @@ class GestionEventos:
         """
         try:
             respuesta = self.gestor_json.buscar(self.tabla, id_evento)
-            if respuesta["codigo"] == 500:
+            if respuesta["codigo"] in [500, 404]:
                 raise ValueError(respuesta["mensaje"])
             ubicaciones = self.gestor_ubicacion.get_ubicaciones()
             if ubicaciones["codigo"] == 500:
                 raise ValueError(ubicaciones["mensaje"])
-            respuesta["registro"][0]["ubicacion_evento"] = ubicaciones["registro"][respuesta["registro"][0]["ubicacion_evento"]]
+            evento_copia = copy.deepcopy(respuesta["registro"][0])
+            evento_copia["ubicacion_evento"] = ubicaciones["registro"][respuesta["registro"]
+                                                                       [0]["ubicacion_evento"]]
+            respuesta["registro"][0] = evento_copia
             return respuesta
         except Exception as e:
-            return {"mensaje": str(e), "codigo": 500}
+            return {"mensaje": str(e), "codigo": 500, "info": traceback.format_exc().splitlines()[-4:-2]}
 
     def put_event_by_id(self, titulo_evento: str, fecha_hora_evento: datetime,
                         descripcion_evento: str, ubicacion_evento: str, id_evento: int) -> dict:
@@ -154,7 +166,7 @@ class GestionEventos:
         Returns:
             dict: Mensaje de éxito o error.
             {"mensaje": "Evento actualizado", "codigo": 200} o
-            {"mensaje": "Mensaje de error", "codigo": 500}
+            {"mensaje": "Mensaje de error", "codigo": 500, "info": "Informacion adicional del error"}
 
         Example:
         >>> gestion = GestionEventos()
@@ -185,8 +197,8 @@ class GestionEventos:
                 raise ValueError(
                     "La fecha y hora del evento no puede ser mayor a dos años desde la fecha y hora actual")
 
-            hora_minima = datetime.time(8, 0, 0)
-            hora_maxima = datetime.time(22, 0, 0)
+            hora_minima = time(8, 0, 0)
+            hora_maxima = time(22, 0, 0)
             if fecha_hora_evento.time() < hora_minima or fecha_hora_evento.time() > hora_maxima:
                 raise ValueError(
                     "La hora del evento debe ser entre las 8:00 am y las 10:00 pm")
@@ -208,17 +220,18 @@ class GestionEventos:
                 raise ValueError(eventos["mensaje"])
 
             for evento in eventos["registro"]:
-                if evento["ubicacion_evento"] == ubicacion_evento and evento["fecha_hora_evento"] == fecha_hora_evento.strftime("%Y-%m-%d %H:%M:%S"):
+                if evento["ubicacion_evento"] == ubicacion_evento and evento["fecha_hora_evento"] == fecha_hora_evento.strftime("%Y-%m-%d %H:%M:%S") and evento["index"] != id_evento:
                     raise ValueError(
                         "La ubicación y fecha del evento ya están ocupadas por otro evento")
 
             respuesta = self.gestor_json.actualizar(self.tabla,
-                        ["titulo_evento", "fecha_hora_evento","descripcion_evento", "ubicacion_evento"],
-                        [titulo_evento, fecha_hora_evento.strftime("%Y-%m-%d %H:%M:%S"), descripcion_evento, ubicacion_evento], id_evento)
+                                                    ["titulo_evento", "fecha_hora_evento",
+                                                        "descripcion_evento", "ubicacion_evento"],
+                                                    [titulo_evento, fecha_hora_evento.strftime("%Y-%m-%d %H:%M:%S"), descripcion_evento, ubicacion_evento], id_evento)
             return respuesta
 
         except Exception as e:
-            return {"mensaje": str(e), "codigo": 500}
+            return {"mensaje": str(e), "codigo": 500, "info": traceback.format_exc().splitlines()[-4:-2]}
 
     def delete_event_by_id(self, id_evento: int) -> dict:
         """
@@ -230,7 +243,7 @@ class GestionEventos:
         Returns:
             dict: Mensaje de éxito o error.
             {data: {"campo1": "valor1", "campo2": "valor2", ...}, "codigo": 200} o
-            {"mensaje": "Mensaje de error", "codigo": 500}
+            {"mensaje": "Mensaje de error", "codigo": 500, "info": "Informacion adicional del error"}
 
         Example:
         >>> gestion = GestionEventos()
@@ -240,10 +253,10 @@ class GestionEventos:
             respuesta = self.gestor_json.borrar(self.tabla, id_evento)
             if respuesta["codigo"] == 500:
                 raise ValueError(respuesta["mensaje"])
-            
+
             return respuesta
         except Exception as e:
-            return {"mensaje": str(e), "codigo": 500}
+            return {"mensaje": str(e), "codigo": 500, "info": traceback.format_exc().splitlines()[-4:-2]}
 
 
 class GestorJson:
@@ -294,7 +307,7 @@ class GestorJson:
         Returns:
             dict: Mensaje de éxito o error.
             {"mensaje": "Registro creado", "codigo": 200} o
-            {"mensaje": "Mensaje de error", "codigo": 500}
+            {"mensaje": "Mensaje de error", "codigo": 500, "info": "Informacion adicional del error"}
 
         Example:
         >>> gestor = GestorJson()
@@ -303,12 +316,14 @@ class GestorJson:
         >>> ["Evento 1", "2021-10-10", "Descripción del evento 1", "Ubicación del evento 1"])
         """
         try:
+            nuevo_index = (self.archivo_json[tabla][-1]["index"])+1
             dict_temporal = dict(zip(campos, valores))
+            dict_temporal["index"] = nuevo_index
             self.archivo_json[tabla].append(dict_temporal)
             self.escribir_archivo()
             return {"mensaje": "Registro creado", "codigo": 200}
         except Exception as e:
-            return {"mensaje": str(e), "codigo": 500}
+            return {"mensaje": str(e), "codigo": 500, "info": traceback.format_exc().splitlines()[-4:-2]}
 
     def buscar(self, tabla: str, id: int = None) -> dict:
         """
@@ -322,7 +337,7 @@ class GestorJson:
         Returns:
             dict: Registro con mensaje de éxito o mensaje de error.
             {"registro": {"campo1": "valor1", "campo2": "valor2", ...}, "mensaje": "Registro encontrado", "codigo": 200} o
-            {"mensaje": "Mensaje de error", "codigo": 500}
+            {"mensaje": "Mensaje de error", "codigo": 500, "info": "Informacion adicional del error"}
 
         Example:
         >>> gestor = GestorJson()
@@ -330,12 +345,17 @@ class GestorJson:
         try:
             if id is None:
                 return {"registro": self.archivo_json[tabla], "mensaje": "Registros encontrados", "codigo": 200}
-            elif 0 < id < len(self.archivo_json[tabla]):
-                return {"registro": [self.archivo_json[tabla][id]], "mensaje": "Registro encontrado", "codigo": 200}
+            elif 0 < id <= self.archivo_json[tabla][-1]["index"]:
+                registro = next(
+                    filter(lambda item: item['index'] == id, self.archivo_json[tabla]), None)
+                if registro == None:
+                    return {"registro": [], "mensaje": "Registro no encontrado", "codigo": 404}
+                else:
+                    return {"registro": [registro], "mensaje": "Registro encontrado", "codigo": 200}
             else:
                 return {"registro": [], "mensaje": "Registro no encontrado", "codigo": 404}
         except Exception as e:
-            return {"mensaje": str(e), "codigo": 500}
+            return {"mensaje": str(e), "codigo": 500, "info": traceback.format_exc().splitlines()[-4:-2]}
 
     def actualizar(self, tabla: str, campos: list[str], valores: list[str], id: int) -> dict:
         """
@@ -350,7 +370,7 @@ class GestorJson:
         Returns:
             dict: Mensaje de éxito o error.
             {"mensaje": "Registro actualizado", "codigo": 200} o
-            {"mensaje": "Mensaje de error", "codigo": 500}
+            {"mensaje": "Mensaje de error", "codigo": 500, "info": "Informacion adicional del error"}
 
         Example:
         >>> gestor = GestorJson()
@@ -360,12 +380,18 @@ class GestorJson:
         >>> 1)
         """
         try:
+            respuesta = self.buscar(tabla, id)
+            if respuesta["codigo"] == 500:
+                raise ValueError(respuesta["mensaje"])
+            item = respuesta["registro"][0]
+            index_lista = self.archivo_json[tabla].index(item)
             dict_temporal = dict(zip(campos, valores))
-            self.archivo_json[tabla][id] = dict_temporal
+            dict_temporal["index"] = item["index"]
+            self.archivo_json[tabla][index_lista] = dict_temporal
             self.escribir_archivo()
             return {"mensaje": "Registro actualizado", "codigo": 200}
         except Exception as e:
-            return {"mensaje": str(e), "codigo": 500}
+            return {"mensaje": str(e), "codigo": 500, "info": traceback.format_exc().splitlines()[-4:-2]}
 
     def borrar(self, tabla: str, id: int) -> dict:
         """
@@ -378,18 +404,23 @@ class GestorJson:
         Returns:
             dict: Mensaje de éxito o error.
             {"data": {"campo1": "valor1", "campo2": "valor2", ...}, "codigo": 200} o
-            {"mensaje": "Mensaje de error", "codigo": 500}
+            {"mensaje": "Mensaje de error", "codigo": 500, "info": "Informacion adicional del error"}
 
         Example:
         >>> gestor = GestorJson()
         >>> gestor.borrar("eventos", 1)
         """
         try:
-            data_eliminada = self.archivo_json[tabla].pop(id)
+            respuesta = self.buscar(tabla, id)
+            if respuesta["codigo"] == 500:
+                raise ValueError(respuesta["mensaje"])
+            item = respuesta["registro"][0]
+            index_lista = self.archivo_json[tabla].index(item)
+            data_eliminada = self.archivo_json[tabla].pop(index_lista)
             self.escribir_archivo()
             return {"data": data_eliminada, "codigo": 200}
         except Exception as e:
-            return {"mensaje": str(e), "codigo": 500}
+            return {"mensaje": str(e), "codigo": 500, "info": traceback.format_exc().splitlines()[-4:-2]}
 
 
 class GestorUbicacion:
@@ -404,12 +435,13 @@ class GestorUbicacion:
         Returns:
             dict: Registro con mensaje de éxito o mensaje de error.
             {"registro": [{"campo1": "valor1", "campo2": "valor2", ...}, ...], "mensaje": "Registros encontrados", "codigo": 200} o
-            {"mensaje": "Mensaje de error", "codigo": 500}
+            {"mensaje": "Mensaje de error", "codigo": 500, "info": "Informacion adicional del error"}
         """
         try:
             respuesta = self.gestor.buscar(self.tabla)
             return respuesta
         except Exception as e:
-            return {"mensaje": str(e), "codigo": 500}
-        
+            return {"mensaje": str(e), "codigo": 500, "info": traceback.format_exc().splitlines()[-4:-2]}
+
+
 gestor_eventos = GestionEventos()
