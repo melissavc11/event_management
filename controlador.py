@@ -107,10 +107,10 @@ def get_event_by_id(id_evento):
     try:
         respuesta = gestor_eventos.get_event_by_id(id_evento)
         if respuesta["codigo"] == 500:
-            return jsonify({"error": respuesta["mensaje"]}), 400
+            return jsonify({"error": respuesta["mensaje"]}), 500
         return jsonify({"data": respuesta["registro"]}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/events/<int:id_evento>", methods=["PUT"])
