@@ -1,6 +1,17 @@
 # event_management
 Desarrolla una aplicación web para la gestión de eventos, donde los usuarios puedan crear, leer, actualizar y eliminar eventos.
 
+## Setup
+1. Clona el repositorio.
+2. Crea un entorno virtual con `python -m venv venv`.(Usar python 3.11)
+3. Activa el entorno virtual con `source venv/bin/activate`.
+   >[!IMPORTANT]
+   En Windows, debe tener la ejecución de scripts habilitada. Esto se puede hacer con el comando `Set-ExecutionPolicy Unrestricted`.
+4. Instala las dependencias con `pip install -r requirements.txt`.
+5. Ejectua el servidor con `python app.py`.
+### Extra:
+- Para correr los tests, ejecuta `python -m unittest discover -s tests` o instala la extensión [Python Test Explorer for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=littlefoxteam.vscode-python-test-adapter) en VSCode y ejecuta desde ahi
+   
 ## Documentación API
 
 ### POST /events
