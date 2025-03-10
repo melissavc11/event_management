@@ -20,6 +20,20 @@
             "descripcion_evento": "Descripcion 3",
             "ubicacion_evento": 0,
             "index": 4
+        },
+        {
+            "titulo_evento": "a",
+            "fecha_hora_evento": "2025-03-12 14:00:00",
+            "descripcion_evento": "a",
+            "ubicacion_evento": 0,
+            "index": 5
+        },
+        {
+            "titulo_evento": "b",
+            "fecha_hora_evento": "2025-03-12 12:00:00",
+            "descripcion_evento": "b",
+            "ubicacion_evento": 1,
+            "index": 6
         }
     ],
     "ubicaciones": [

@@ -80,13 +80,13 @@ class TestApi(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
     
 
-    def test_10_delete_event(self):
+    def test_91_delete_event(self):
         response = self.app.delete('/events/5')
         self.assertIn('mensaje', response.json)
         self.assertEqual(response.status_code, 200)
 
 
-    def test_11_get_locations(self):
+    def test_92_get_locations(self):
         response = self.app.get('/locations')
         self.assertEqual(response.status_code, 200)
         self.assertIn('data', response.json)
